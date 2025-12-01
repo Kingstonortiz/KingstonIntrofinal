@@ -1,0 +1,246 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kingston — Intro</title>
+<style>
+  /* Reset */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    background:#000;
+    color:gold;
+    overflow-x:hidden;
+  }
+
+  /* Starfield canvas */
+  #starfield{
+    position:fixed;inset:0;z-index:-10;display:block;
+  }
+
+  /* Header / logo / controls */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;position:relative;z-index:50;
+    background:linear-gradient(180deg,rgba(0,0,0,0.45),rgba(0,0,0,0.12));
+    backdrop-filter:blur(5px);
+  }
+  #logo-wrap{perspective:700px;width:120px;height:64px;display:flex;align-items:center;justify-content:center}
+  #logo{
+    width:110px;height:54px;display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:28px;letter-spacing:6px;border-radius:10px;
+    color:#b8892b;background:linear-gradient(180deg,#0b0b0b 0%,#1f1f1f 60%);
+    border:2px solid rgba(185,137,43,0.95);transform-style:preserve-3d;
+    animation:spinLogo 8s linear infinite;text-shadow:0 2px 0 rgba(0,0,0,.7)
+  }
+  @keyframes spinLogo{0%{transform:rotateY(0deg) rotateX(0deg)}100%{transform:rotateY(360deg) rotateX(10deg)}}
+  .controls{display:flex;gap:12px;align-items:center}
+  .btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);color:gold;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+  .btn:hover{color:#fff;transform:translateY(-2px)}
+
+  /* Sidebar */
+  #sidebar{position:fixed;left:-260px;top:0;bottom:0;width:260px;background:rgba(8,8,8,0.98);padding:24px;z-index:60;transition:left .35s}
+  #sidebar.open{left:0}
+  #sidebar h3{color:#e6c96a;margin-bottom:12px;text-align:left}
+  #sidebar a{display:block;margin:8px 0;color:gold;text-decoration:none;font-weight:700}
+  #menuToggle{position:fixed;left:18px;top:18px;z-index:70}
+
+  /* Star Wars crawl */
+  .crawl-wrap{width:100%;height:260px;overflow:hidden;position:relative;margin-top:18px}
+  .crawl{
+    font-family:Georgia,"Times New Roman",serif;font-size:20px;color:gold;width:70%;margin:0 auto;
+    transform-origin:50% 100%;perspective:400px;text-align:center;position:relative;top:120px;
+    animation:crawlAnim 16s linear forwards;line-height:1.6
+  }
+  .crawl p{margin-bottom:14px;font-weight:600;text-transform:uppercase;letter-spacing:2px}
+  @keyframes crawlAnim{
+    0%{transform:translateY(100%) rotateX(20deg) scale(.9);opacity:1}
+    100%{transform:translateY(-400%) rotateX(20deg) scale(.6);opacity:0}
+  }
+
+  /* Main content */
+  main{max-width:1000px;margin:18px auto 80px auto;padding:0 18px}
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(0,0,0,0.12));border:1px solid rgba(185,137,43,0.06);padding:22px;border-radius:14px;margin-bottom:28px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+  .holo{border:2px solid rgba(0,255,255,0.18);box-shadow:0 0 30px rgba(0,255,255,0.06);color:gold}
+  .info-grid{display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:center}
+  .info-item{min-width:220px;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+
+  /* Gallery */
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:12px}
+  .gallery-grid img{width:100%;height:160px;object-fit:cover;border-radius:10px;border:2px solid rgba(185,137,43,0.18);box-shadow:0 8px 18px rgba(0,0,0,0.7);transition:transform .28s,box-shadow .28s;cursor:pointer}
+  .gallery-grid img:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 18px 40px rgba(0,0,0,0.9)}
+
+  /* Carousel */
+  #carousel{margin-top:20px;overflow:hidden;border-radius:12px}
+  #carousel-track{display:flex;gap:18px;animation:carouselScroll 18s linear infinite;padding:14px}
+  #carousel-track img{width:320px;height:200px;object-fit:cover;border-radius:10px;border:2px solid rgba(185,137,43,0.12)}
+  @keyframes carouselScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+  /* Modal */
+  #modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:120;visibility:hidden;opacity:0;transition:opacity .25s}
+  #modal.open{visibility:visible;opacity:1}
+  #modal img{max-width:90%;max-height:90%;border-radius:12px;box-shadow:0 0 40px rgba(255,255,255,0.08)}
+
+  /* Dark mode */
+  body.dark{background:#020103;color:#fff8d8}
+  body.dark .panel{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.03)}
+  body.dark #logo{color:#f5e1a3;border-color:rgba(245,225,163,0.9)}
+
+  /* Utilities */
+  .center{text-align:center}
+  small.note{display:block;margin-top:8px;color:rgba(255,235,170,0.8);font-size:13px}
+
+  @media(max-width:700px){#logo{font-size:20px;letter-spacing:3px;width:90px;height:46px}.crawl{width:90%;font-size:16px}}
+</style>
+</head>
+<body>
+
+<!-- Starfield canvas -->
+<canvas id="starfield"></canvas>
+
+<!-- Sidebar -->
+<div id="sidebar" aria-hidden="true">
+  <h3>Navigation</h3>
+  <a href="#intro">Intro Crawl</a>
+  <a href="#about">About Me</a>
+  <a href="#gallery">Gallery</a>
+  <a href="#carousel">Carousel</a>
+  <small class="note">Use the menu button to open/close.</small>
+</div>
+
+<!-- Header -->
+<header>
+  <div id="menuToggle" class="btn" onclick="toggleSidebar()">☰</div>
+  <div id="logo-wrap"><div id="logo">K | O</div></div>
+  <div class="controls">
+    <button class="btn" onclick="playCrawl()">Play Intro</button>
+    <button class="btn" id="darkBtn" onclick="toggleDark()">Dark</button>
+  </div>
+</header>
+
+<!-- Star Wars-style crawl -->
+<section class="crawl-wrap" id="intro">
+  <div class="crawl" id="crawlText">
+    <p>A long time ago</p>
+    <p>in a city far, far away...</p>
+    <p><strong>RICHMOND, VIRGINIA</strong></p>
+    <p>A new voice was born on May 26, 2011.</p>
+    <p>He grows and learns in South Gwinnett High School — 9th Grade.</p>
+    <p>Welcome to the chronicle of Kingston.</p>
+  </div>
+</section>
+
+<!-- Main -->
+<main>
+  <section id="about" class="panel holo center">
+    <h2>HoloTable — Personal Info</h2>
+    <div class="info-grid center" style="margin-top:12px;">
+      <div class="info-item"><strong>Birthdate</strong><div>May 26, 2011</div></div>
+      <div class="info-item"><strong>Birthplace</strong><div>Richmond, Virginia</div></div>
+      <div class="info-item"><strong>Grade</strong><div>9th Grade — South Gwinnett High School</div></div>
+    </div>
+    <small class="note">This panel is for your school project — keep it clean and proud.</small>
+  </section>
+
+  <section id="gallery" class="panel">
+    <h2>My Photo Gallery</h2>
+    <div class="gallery-grid" id="galleryGrid">
+      <!-- Default remote placeholders; when you upload to /images these will auto-swap -->
+      <img data-src="images/starwars.jpg" src="https://images.unsplash.com/photo-1549504907-7234275a1c03" alt="star wars image">
+      <img data-src="images/basketball.jpg" src="https://images.unsplash.com/photo-1517649763962-0c623066013b" alt="basketball image">
+      <img data-src="images/olive_garden.jpg" src="https://images.unsplash.com/photo-1576866209830-61a03b1e8f56" alt="olive garden">
+      <img data-src="images/richmond.jpg" src="https://images.unsplash.com/photo-1505591184983-212b39e2f3c8" alt="richmond">
+      <img data-src="images/georgia.jpg" src="https://images.unsplash.com/photo-1528484592801-6c5d4c3f9c9d" alt="georgia">
+      <img data-src="images/south_gwinnett.jpg" src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1" alt="south gwinnett">
+    </div>
+    <small class="note">Tip: upload images to folder named <code>images</code> and they will auto-replace.</small>
+  </section>
+
+  <section id="carousel" class="panel">
+    <h2>Gallery Carousel</h2>
+    <div id="carousel-track">
+      <img src="https://picsum.photos/400/300?random=21" alt="">
+      <img src="https://picsum.photos/400/300?random=22" alt="">
+      <img src="https://picsum.photos/400/300?random=23" alt="">
+      <img src="https://picsum.photos/400/300?random=24" alt="">
+    </div>
+  </section>
+</main>
+
+<!-- Modal -->
+<div id="modal" onclick="closeModal(event)"><img id="modalImg" src=""></div>
+
+<script>
+/* STARFIELD */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+window.addEventListener('resize',resize);resize();
+
+const STARS = [];
+const STAR_COUNT = Math.max(140, Math.floor((W*H)/9000));
+for(let i=0;i<STAR_COUNT;i++){
+  STARS.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.6+0.2,s:Math.random()*0.7+0.1,t:Math.random()*1.2});
+}
+function drawStars(){
+  ctx.clearRect(0,0,W,H);
+  for(let s of STARS){
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(255,255,255,${0.5+Math.abs(Math.sin(Date.now()/1000+s.t))*0.6})`;
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();
+    s.y += s.s; s.x += s.s*0.15;
+    if(s.y>H+10){s.y=-10;s.x=Math.random()*W}
+    if(s.x>W+10){s.x=-10}
+  }
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+/* SIDEBAR */
+const sidebar = document.getElementById('sidebar');
+function toggleSidebar(){sidebar.classList.toggle('open');sidebar.setAttribute('aria-hidden',sidebar.classList.contains('open')?'false':'true')}
+
+/* CRAWL */
+const crawl = document.getElementById('crawlText');
+function playCrawl(){crawl.style.animation='none';void crawl.offsetWidth;crawl.style.animation=null}
+
+/* DARK */
+function toggleDark(){document.body.classList.toggle('dark');document.getElementById('darkBtn').innerText=document.body.classList.contains('dark')?'Light':'Dark'}
+
+/* MODAL */
+const modal = document.getElementById('modal'), modalImg=document.getElementById('modalImg');
+document.querySelectorAll('.gallery-grid img').forEach(img=>{
+  img.addEventListener('click',()=>{modalImg.src=img.src;modal.classList.add('open')});
+});
+function closeModal(e){ if(e.target===modal) modal.classList.remove('open') }
+
+/* AUTO-SWAP LOCAL IMAGES IF UPLOADED TO /images */
+function trySwapLocalImages(){
+  document.querySelectorAll('[data-src]').forEach(el=>{
+    const local = el.getAttribute('data-src');
+    const test = new Image();
+    test.onload = ()=> { el.src = local; };
+    test.onerror = ()=> { /* keep remote placeholder */ };
+    test.src = local;
+  });
+}
+trySwapLocalImages();
+
+/* Carousel duplicate for smooth loop */
+const track = document.getElementById('carousel-track');
+track.innerHTML += track.innerHTML;
+</script>
+
+<!-- Quick instructions:
+1) In GitHub, create folder 'images' then upload your files named exactly:
+   starwars.jpg, basketball.jpg, olive_garden.jpg, richmond.jpg, georgia.jpg, south_gwinnett.jpg
+2) Commit. Refresh the page and the gallery will auto-swap to your images.
+-->
+
+</body>
+</html>
+```
